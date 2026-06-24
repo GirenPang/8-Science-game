@@ -43,7 +43,7 @@
   --r:14px; --r-sm:10px; --r-pill:999px;
 }
 
-html{font-size:17px}
+html{font-size:14px}
 html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--font);overflow-x:hidden;user-select:none;-webkit-user-select:none}
 body{
   background-image:
@@ -55,7 +55,7 @@ button{font-family:var(--font);cursor:pointer}
 :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
 
 /* ─── 佈局 ─── */
-#app{min-height:100vh;padding:28px 24px 90px;display:flex;flex-direction:column;align-items:center}
+#app{min-height:100vh;padding:22px 18px 72px;display:flex;flex-direction:column;align-items:center}
 .wrap{width:100%;max-width:1080px;margin:0 auto}
 
 /* ─── Topbar ─── */
@@ -63,7 +63,7 @@ button{font-family:var(--font);cursor:pointer}
 .brand{display:flex;align-items:center;gap:12px}
 .brand-logo{flex-shrink:0;width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(56,189,248,0.4);box-shadow:0 0 10px rgba(56,189,248,0.25)}
 .brand-mark{
-  font-weight:900;font-size:clamp(22px,4.5vw,34px);letter-spacing:3px;
+  font-weight:900;font-size:clamp(18px,3.6vw,27px);letter-spacing:3px;
   color:#F1F5F9;text-shadow:0 2px 12px rgba(56,189,248,0.25);
 }
 
@@ -369,8 +369,8 @@ button{font-family:var(--font);cursor:pointer}
 
 /* 響應式 */
 @media(max-width:600px){
-  html{font-size:15px}
-  #app{padding:18px 14px 70px}
+  html{font-size:12px}
+  #app{padding:14px 11px 60px}
   .topbar{margin-bottom:16px}
   .pair-box{padding:38px 16px;gap:18px}
   .mc-card{padding:34px 16px}
@@ -704,26 +704,8 @@ function showReview(){
           <div class="cn">${e.c}</div>
         </div>`).join('')}
     </div>
-  </div>
-  <div class="rev-popup" id="rev-popup">
-    <button class="rev-close" id="rev-close">✕</button>
-    <div class="p-num" id="p-num"></div>
-    <div class="p-sym" id="p-sym"></div>
-    <div class="p-cn" id="p-cn"></div>
-    <div class="p-actions">
-      <button class="btn primary" id="p-speak">再讀一次 ▶</button>
-      <button class="btn ghost" id="p-close2">關閉</button>
-    </div>
   </div>`;
   $app.querySelector('#back').onclick=showMenu;
-  const popup=$app.querySelector('#rev-popup');
-  const pNum=$app.querySelector('#p-num');
-  const pSym=$app.querySelector('#p-sym');
-  const pCn=$app.querySelector('#p-cn');
-  const closePopup=()=>{popup.classList.remove('open');if(currentElem){const card=$app.querySelector(`.rev-card[data-n="${currentElem.n}"]`);if(card)card.classList.remove('playing')}currentElem=null};
-  $app.querySelector('#rev-close').onclick=closePopup;
-  $app.querySelector('#p-close2').onclick=closePopup;
-  $app.querySelector('#p-speak').onclick=()=>{if(currentElem)speakElement(currentElem)};
   $app.querySelectorAll('.rev-card').forEach(card=>{
     const handler=(e)=>{
       playSound('click');
@@ -734,10 +716,6 @@ function showReview(){
       currentElem=elem;
       card.classList.add('playing');
       addRipple(card,e.touches?e.touches[0]:e);
-      pNum.textContent=`No.${elem.n}`;
-      pSym.textContent=elem.s;
-      pCn.textContent=elem.c;
-      popup.classList.add('open');
       speakElement(elem);
     };
     card.addEventListener('click',handler);
