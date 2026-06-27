@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧪 國二理化特訓－化學式大冒險</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+TC:wght@400;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ng: #43a047;
+  --nb: #1e88e5;
+  --np: #8e24aa;
+  --nr: #e53935;
+  --ny: #f9a825;
+  --bg: #fdfbf7;
+  --card: #ffffff;
+  --dim: rgba(160,150,200,0.22);
+  --shadow: rgba(120,110,160,0.13);
+  --text-main: #3a3030;
+  --text-sub: #7a6f65;
+}
+html{font-size:17px;}
+body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text-main);min-height:100vh;overflow-x:hidden;transition:background .15s;}
+body.flash-good{animation:fgood .4s ease;}
+body.flash-bad{animation:fbad .4s ease;}
+body.time-alert{animation:tpulse .85s ease-in-out infinite;}
+@keyframes fgood{0%,100%{filter:none;}45%{filter:brightness(1.06) saturate(1.25);}}
+@keyframes fbad{0%,100%{filter:none;}45%{filter:sepia(.12) saturate(1.3);}}
+@keyframes tpulse{0%,100%{box-shadow:inset 0 0 0 rgba(229,57,53,0);}50%{box-shadow:inset 0 0 0 16px rgba(229,57,53,.18);}}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none;}
+
+/* HUD */
+.hud{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(253,251,247,.97);border-bottom:3px solid rgba(180,170,220,0.18);padding:10px 28px;display:flex;justify-content:center;gap:40px;flex-wrap:wrap;backdrop-filter:blur(10px);box-shadow:0 2px 18px var(--shadow);}
+.hi{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.hl{font-size:0.68rem;color:#b0a090;letter-spacing:1.5px;font-weight:900;text-transform:uppercase;}
+.hv{font-size:1.5rem;font-weight:900;font-family:'Fredoka One',sans-serif;}
+.hv.g{color:var(--ng);}.hv.b{color:var(--nb);}.hv.r{color:var(--nr);}.hv.y{color:var(--ny);}
+.hud .time-low .hv{color:var(--nr);animation:bounce .3s infinite alternate;}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-4px);}}
+
+.wrap{max-width:860px;margin:0 auto;padding:108px 22px 60px;}
+.screen{display:none;animation:fadein .35s cubic-bezier(0.175,.885,.32,1.275);}
+.screen.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+/* 開始畫面 */
+.title-main{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#1e88e5,#8e24aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.25;text-align:center;letter-spacing:1px;}
+.title-sub{font-size:0.97rem;color:var(--text-sub);margin-top:12px;line-height:1.9;text-align:center;}
+.bio-tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px;justify-content:center;}
+.bio-tag{border:2.5px solid var(--dim);background:#fff;color:var(--text-sub);border-radius:22px;padding:7px 16px;font-size:0.82rem;font-weight:700;box-shadow:0 3px 0 var(--dim);}
+.sec-label{font-size:0.78rem;letter-spacing:1.5px;color:#b0a090;margin:28px 0 14px;font-weight:900;position:relative;padding-left:14px;}
+.sec-label::before{content:'🧪';position:absolute;left:0;top:-1px;font-size:0.78rem;}
+
+/* 模式／難度卡片 */
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+.mode-card,.level-card{background:var(--card);border:3px solid var(--dim);border-radius:22px;padding:24px 18px;cursor:pointer;text-align:left;transition:.2s;box-shadow:0 7px 0 var(--dim);}
+.mode-card:hover,.level-card:hover{transform:translateY(-3px);box-shadow:0 10px 0 var(--dim);}
+.mode-card.sel{border-color:var(--nb);box-shadow:0 7px 0 rgba(30,136,229,.35);background:rgba(30,136,229,.06);}
+.level-card.sel{border-color:var(--np);box-shadow:0 7px 0 rgba(142,36,170,.35);background:rgba(142,36,170,.06);}
+.mc-icon{font-size:2.2rem;margin-bottom:10px;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.08));}
+.mc-name{font-size:1.08rem;font-weight:900;color:var(--text-main);}
+.mc-desc{font-size:0.8rem;color:var(--text-sub);margin-top:5px;font-weight:700;line-height:1.6;}
+.lc-name{font-size:1.1rem;font-weight:900;margin-bottom:6px;}
+.lc-desc{font-size:0.8rem;color:var(--text-sub);font-weight:700;line-height:1.6;}
+
+/* 開始按鈕 */
+.start-btn{display:block;width:100%;padding:20px;font-size:1.25rem;font-weight:900;background:linear-gradient(135deg,#ffb74d,#ff7043);color:#fff;border-radius:22px;cursor:pointer;letter-spacing:2px;box-shadow:0 8px 0 #bf360c,0 14px 24px rgba(0,0,0,0.1);transition:.15s;text-shadow:1px 1px 3px rgba(0,0,0,0.2);}
+.start-btn:hover{filter:brightness(1.06);transform:translateY(2px);box-shadow:0 6px 0 #bf360c,0 9px 16px rgba(0,0,0,0.1);}
+.start-btn:active{transform:translateY(7px);box-shadow:0 2px 0 #bf360c;}
+
+/* 答題 */
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.chapter-tag{display:inline-flex;align-items:center;background:rgba(67,160,71,.1);border:2.5px solid var(--ng);color:var(--ng);border-radius:22px;padding:7px 18px;font-size:0.87rem;font-weight:900;}
+.count-label{font-size:0.92rem;color:var(--text-sub);font-weight:900;}
+.progress-bar{height:16px;background:var(--dim);border-radius:12px;margin-bottom:24px;overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,0.06);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--nb),var(--np));transition:width .45s cubic-bezier(.4,0,.2,1);border-radius:12px;}
+.question-card{background:var(--card);border:3px solid var(--dim);border-radius:26px;padding:32px 28px;margin-bottom:22px;box-shadow:0 9px 0 var(--dim);}
+.question-text{font-size:1.35rem;font-weight:900;line-height:1.9;color:var(--text-main);}
+
+.bio-visual{display:grid;place-items:center;border-radius:18px;border:3px dashed var(--dim);background:#faf8f5;padding:16px;margin-bottom:20px;}
+.bio-visual svg{width:min(90%,280px);height:auto;}
+
+/* 選項按鈕 */
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+.opt-btn{background:var(--card);border:3px solid var(--dim);border-radius:22px;padding:20px 18px;cursor:pointer;text-align:left;font-size:1.1rem;color:var(--text-main);box-shadow:0 6px 0 var(--dim);transition:.18s;line-height:1.7;font-weight:700;}
+.opt-btn:not([disabled]):hover{border-color:var(--nb);background:rgba(30,136,229,.05);transform:translateY(-3px);box-shadow:0 9px 0 rgba(30,136,229,.3);}
+.opt-btn.correct{border-color:var(--ng)!important;box-shadow:0 6px 0 rgba(67,160,71,.4)!important;background:rgba(67,160,71,.1)!important;color:var(--ng)!important;font-weight:900;}
+.opt-btn.wrong{border-color:var(--nr)!important;box-shadow:0 6px 0 rgba(229,57,53,.35)!important;background:rgba(229,57,53,.08)!important;color:var(--nr)!important;font-weight:900;}
+.opt-btn:disabled{cursor:default;}
+
+/* 連連看 */
+.match-board{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:14px;}
+.match-col{display:grid;gap:13px;}
+.match-col-title{font-size:0.74rem;color:#b0a090;letter-spacing:1px;margin-bottom:5px;font-weight:900;text-align:center;}
+.match-card{background:var(--card);border:3px solid var(--dim);border-radius:18px;padding:16px 14px;cursor:pointer;text-align:center;font-size:0.95rem;color:var(--text-main);box-shadow:0 5px 0 var(--dim);transition:.16s;font-weight:700;}
+.match-card:hover:not([disabled]){border-color:var(--nb);transform:translateY(-2px);box-shadow:0 7px 0 rgba(30,136,229,.3);}
+.match-card.sel{border-color:var(--ny);box-shadow:0 5px 0 rgba(249,168,37,.4);background:rgba(249,168,37,.1);color:#b07800;}
+.match-card.correct{border-color:var(--ng)!important;box-shadow:0 5px 0 rgba(67,160,71,.4)!important;background:rgba(67,160,71,.1)!important;color:var(--ng)!important;}
+.match-card.wrong{border-color:var(--nr)!important;box-shadow:0 5px 0 rgba(229,57,53,.3)!important;background:rgba(229,57,53,.08)!important;color:var(--nr)!important;}
+.match-card.done{opacity:.45;pointer-events:none;box-shadow:none;transform:none;}
+
+/* 分類 */
+.sort-board{display:grid;gap:20px;margin-top:14px;}
+.sort-zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;}
+.sort-zone{background:rgba(67,160,71,.04);border:3px dashed var(--ng);border-radius:22px;min-height:120px;padding:14px;cursor:pointer;transition:.16s;}
+.sort-zone:hover{background:rgba(30,136,229,.05);border-color:var(--nb);}
+.sort-zone strong{display:block;color:var(--ng);font-size:0.86rem;margin-bottom:10px;font-weight:900;text-align:center;background:#fff;padding:5px;border-radius:12px;border:2px solid var(--ng);}
+.sort-drop-list{display:grid;gap:6px;}
+.sort-pill{background:#fff;border:2px solid var(--dim);border-radius:22px;padding:7px 13px;font-size:0.83rem;color:var(--text-main);font-weight:700;text-align:center;box-shadow:0 2px 0 var(--dim);}
+.sort-pill.correct{border-color:var(--ng);color:var(--ng);background:rgba(67,160,71,.08);box-shadow:0 2px 0 rgba(67,160,71,.3);}
+.sort-pill.wrong{border-color:var(--nr);color:var(--nr);background:rgba(229,57,53,.07);box-shadow:0 2px 0 rgba(229,57,53,.25);}
+.sort-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:13px;}
+.sort-card{background:var(--card);border:3px solid var(--dim);border-radius:16px;padding:15px;font-size:0.94rem;font-weight:900;text-align:center;cursor:pointer;box-shadow:0 5px 0 var(--dim);transition:.16s;color:var(--text-main);}
+.sort-card:hover:not(.done){border-color:var(--nb);transform:translateY(-2px);box-shadow:0 7px 0 rgba(30,136,229,.28);}
+.sort-card.sel{border-color:var(--ny);box-shadow:0 5px 0 rgba(249,168,37,.4);background:rgba(249,168,37,.1);color:#b07800;}
+.sort-card.done{opacity:.3;pointer-events:none;box-shadow:none;}
+
+/* 特徵勾選 */
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:18px;}
+.feat-btn{background:var(--card);border:3px solid var(--dim);border-radius:18px;padding:18px 16px;cursor:pointer;text-align:left;font-size:0.95rem;color:var(--text-main);box-shadow:0 5px 0 var(--dim);transition:.16s;font-weight:700;line-height:1.6;}
+.feat-btn:hover:not([disabled]){border-color:var(--nb);transform:translateY(-2px);box-shadow:0 7px 0 rgba(30,136,229,.28);}
+.feat-btn.sel{border-color:var(--ny);box-shadow:0 5px 0 rgba(249,168,37,.4);background:rgba(249,168,37,.1);color:#b07800;}
+.feat-btn.correct{border-color:var(--ng)!important;box-shadow:0 5px 0 rgba(67,160,71,.4)!important;background:rgba(67,160,71,.1)!important;color:var(--ng)!important;}
+.feat-btn.wrong{border-color:var(--nr)!important;box-shadow:0 5px 0 rgba(229,57,53,.3)!important;background:rgba(229,57,53,.08)!important;color:var(--nr)!important;}
+.feat-btn.missed{border-color:var(--ng)!important;background:rgba(67,160,71,.05)!important;color:var(--ng)!important;outline:3px dashed var(--ng);outline-offset:-5px;box-shadow:none;}
+
+/* 反饋 */
+.feedback{border-radius:22px;border:3px solid var(--dim);padding:22px 24px;margin-top:20px;display:none;background:#fff;}
+.feedback.show{display:block;animation:pop .3s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes pop{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+.feedback.good{border-color:var(--ng);background:rgba(67,160,71,.05);box-shadow:0 7px 0 rgba(67,160,71,.18);}
+.feedback.bad{border-color:var(--nr);background:rgba(229,57,53,.05);box-shadow:0 7px 0 rgba(229,57,53,.16);}
+.fb-title{display:block;margin-bottom:7px;font-size:1.08rem;font-weight:900;}
+.feedback.good .fb-title{color:var(--ng);}
+.feedback.bad .fb-title{color:var(--nr);}
+.fb-text{font-size:0.92rem;color:#6a5f55;line-height:1.9;font-weight:700;}
+
+/* 控制按鈕 */
+.controls{display:flex;gap:13px;flex-wrap:wrap;margin-top:20px;}
+.primary-btn{padding:15px 32px;font-size:1.05rem;font-weight:900;background:linear-gradient(135deg,var(--nb),var(--np));color:#fff;border-radius:18px;box-shadow:0 6px 0 #4a0072;transition:.15s;letter-spacing:1px;}
+.primary-btn:hover{filter:brightness(1.06);transform:translateY(1px);box-shadow:0 5px 0 #4a0072;}
+.secondary-btn{padding:15px 32px;font-size:1.05rem;font-weight:900;background:#fff;border:3px solid var(--dim);color:var(--text-sub);border-radius:18px;box-shadow:0 6px 0 var(--dim);transition:.15s;}
+.secondary-btn:hover{border-color:var(--np);color:var(--np);box-shadow:0 6px 0 rgba(142,36,170,.28);}
+.submit-btn{display:inline-block;padding:15px 32px;background:rgba(67,160,71,.1);border:3px solid var(--ng);color:var(--ng);border-radius:18px;font-size:1.02rem;font-weight:900;box-shadow:0 6px 0 rgba(67,160,71,.3);transition:.15s;}
+.submit-btn:hover{background:rgba(67,160,71,.18);transform:translateY(-2px);box-shadow:0 8px 0 rgba(67,160,71,.3);}
+.hidden{display:none!important;}
+
+/* 結算 */
+.end-card{background:var(--card);border:3px solid var(--dim);border-radius:30px;padding:52px 38px;text-align:center;box-shadow:0 14px 0 var(--dim);}
+.end-eyebrow{font-size:0.82rem;letter-spacing:2px;color:#b0a090;text-transform:uppercase;margin-bottom:14px;font-weight:900;}
+.end-score{font-size:6rem;font-weight:900;font-family:'Fredoka One',sans-serif;background:linear-gradient(135deg,var(--nb),var(--nr));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.end-max{font-size:0.97rem;color:var(--text-sub);margin:9px 0 18px;font-weight:700;}
+.rank-badge{font-family:'Fredoka One',sans-serif;}
+.end-msg{font-size:1.08rem;color:var(--text-main);line-height:1.9;margin-bottom:30px;font-weight:900;}
+.review-list{display:grid;gap:14px;margin-top:26px;text-align:left;}
+.review-item{background:#faf8f5;border:3px solid var(--dim);border-radius:20px;padding:20px 22px;box-shadow:0 5px 0 var(--dim);}
+.review-item strong{display:block;margin-bottom:9px;font-size:1.02rem;color:var(--text-main);}
+.review-item .ri-yours{font-size:0.87rem;color:var(--nr);margin-bottom:5px;font-weight:900;}
+.review-item .ri-correct{font-size:0.87rem;color:var(--ng);margin-bottom:7px;font-weight:900;}
+.review-item .ri-hint{font-size:0.87rem;color:#7a6f65;line-height:1.9;font-weight:700;background:#fff;padding:11px 13px;border-radius:14px;border:2px dashed var(--dim);}
+
+@media(max-width:560px){
+  .mode-grid,.level-grid,.options-grid,.match-board,.feature-grid{grid-template-columns:1fr;}
+  .hud{gap:18px;}
+  html{font-size:17px;}
+}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="hi"><span class="hl">特訓等級</span><span class="hv g" id="hud-level">—</span></div>
+  <div class="hi" id="hud-time-box"><span class="hl">限時倒數</span><span class="hv b" id="hud-time">—</span></div>
+  <div class="hi"><span class="hl">防爆生命值</span><span class="hv r" id="hud-lives">—</span></div>
+  <div class="hi"><span class="hl">化學積點</span><span class="hv y" id="hud-score">0</span></div>
+</div>
+
+<div class="wrap">
+
+<div id="start-screen" class="screen active">
+  <div style="padding:0 0 26px;text-align:center;">
+    <div class="title-main">🧪 國二理化特訓－化學式大冒險</div>
+    <p class="title-sub">寫錯化學式直接炸掉實驗室？快來挑戰三大模式！<br>王牌理化名師幫你設計的秒背神作，這輪全對，下週小考、段考閉著眼睛拿滿分！</p>
+    <div class="bio-tags">
+      <span class="bio-tag">💥 酸類天王</span><span class="bio-tag">🧼 鹼類大軍</span>
+      <span class="bio-tag">🧂 經典鹽類</span><span class="bio-tag">☁️ 雙原子氣體</span><span class="bio-tag">🔋 電離子小兵</span>
+    </div>
+  </div>
+
+  <div class="sec-label">第一步：選擇挑戰模式</div>
+  <div class="mode-grid" id="mode-grid">
+    <div class="mode-card sel" data-mode="choice">
+      <div class="mc-icon">⚡</div><div class="mc-name">可愛選擇題</div><div class="mc-desc">經典中翻英、英翻中快速判斷</div>
+    </div>
+    <div class="mode-card" data-mode="sort">
+      <div class="mc-icon">🗂️</div><div class="mc-name">酸鹼鹽大歸位</div><div class="mc-desc">將卡片放入正確電解質分類框</div>
+    </div>
+    <div class="mode-card" data-mode="feature">
+      <div class="mc-icon">☑️</div><div class="mc-name">離子價數大勾選</div><div class="mc-desc">多選勾出正確的離子價數特徵</div>
+    </div>
+  </div>
+
+  <div class="sec-label">第二步：選擇特訓難度</div>
+  <div class="level-grid" id="level-grid">
+    <div class="level-card sel" data-level="easy">
+      <div class="lc-name" style="color:var(--ng)">🌱 燒杯初級</div>
+      <div class="lc-desc">10題｜30秒／題｜3條命</div>
+      <div class="lc-desc" style="margin-top:5px;color:#b0a090;">基礎單質與常見化合物</div>
+    </div>
+    <div class="level-card" data-level="medium">
+      <div class="lc-name" style="color:var(--nb)">⚡ 量筒中級</div>
+      <div class="lc-desc">12題｜20秒／題｜3條命</div>
+      <div class="lc-desc" style="margin-top:5px;color:#b0a090;">加入離子團與繁雜鹽類</div>
+    </div>
+    <div class="level-card" data-level="hard">
+      <div class="lc-name" style="color:var(--nr)">🔥 魔王錐形瓶</div>
+      <div class="lc-desc">15題｜10秒／題｜2條命</div>
+      <div class="lc-desc" style="margin-top:5px;color:#b0a090;">秒殺手速！沒拿對不起父母</div>
+    </div>
+  </div>
+
+  <button class="start-btn" id="start-btn">開啟化學式元素特訓之旅 →</button>
+</div>
+
+<div id="quiz-screen" class="screen">
+  <div class="quiz-meta">
+    <span class="chapter-tag" id="chapter-label">章節</span>
+    <span class="count-label" id="count-label">第 1 題</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="question-card">
+    <div id="visual-slot"></div>
+    <div class="question-text" id="question-text">試劑配置中，請稍候...</div>
+  </div>
+  <div id="answer-area"></div>
+  <div id="feedback" class="feedback">
+    <span class="fb-title" id="fb-title"></span>
+    <div class="fb-text" id="fb-text"></div>
+  </div>
+  <div class="controls">
+    <button class="primary-btn hidden" id="next-btn">前進下一題 🚀</button>
+    <button class="secondary-btn" id="quit-btn">倒掉試劑，撤退回選單</button>
+  </div>
+</div>
+
+<div id="end-screen" class="screen">
+  <div class="end-card">
+    <div class="end-eyebrow">✨ 實驗報告結算 ✨</div>
+    <div class="end-score" id="end-score">0</div>
+    <div class="end-of-max" id="end-max">/ 0 分</div>
+    <div class="rank-badge" id="rank-badge"></div>
+    <div class="end-msg" id="end-msg"></div>
+    <div class="controls" style="justify-content:center;">
+      <button class="primary-btn" id="retry-wrong-btn" style="background:linear-gradient(135deg,var(--ny),#f57c00);box-shadow:0 6px 0 #bf360c;">重組沉澱物（練錯題）🎯</button>
+      <button class="secondary-btn" id="restart-btn">清洗儀器更換難度 🔄</button>
+    </div>
+    <div class="review-list" id="review-list"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const LEVELS={
+  easy:{label:"初級",count:10,seconds:30,hearts:3,maxD:1},
+  medium:{label:"中級",count:12,seconds:20,hearts:3,maxD:2},
+  hard:{label:"高級",count:15,seconds:10,hearts:2,maxD:3}
+};
+const VISUALS={
+  acid:`<svg viewBox="0 0 220 170"><rect width="220" height="170" rx="18" fill="#fffdfa" stroke="#e53935" stroke-width="2"/><path d="M80 140 L140 140 L120 60 L100 60 Z" fill="#e53935" opacity="0.25" stroke="#e53935" stroke-width="4"/><circle cx="100" cy="110" r="6" fill="#e53935"/><circle cx="120" cy="125" r="4" fill="#e53935"/><circle cx="110" cy="90" r="5" fill="#e53935"/><text x="110" y="35" text-anchor="middle" fill="#e53935" font-size="15" font-weight="900">酸性：水中解離出 H+</text></svg>`,
+  alkali:`<svg viewBox="0 0 220 170"><rect width="220" height="170" rx="18" fill="#fffdfa" stroke="#1e88e5" stroke-width="2"/><path d="M70 140 L150 140 L150 70 L70 70 Z" fill="#1e88e5" opacity="0.15" stroke="#1e88e5" stroke-width="4"/><circle cx="90" cy="100" r="8" fill="#1e88e5"/><circle cx="130" cy="110" r="6" fill="#1e88e5"/><text x="110" y="35" text-anchor="middle" fill="#0d47a1" font-size="15" font-weight="900">鹼性：大部分解離出 OH-</text></svg>`,
+  salt:`<svg viewBox="0 0 220 170"><rect width="220" height="170" rx="18" fill="#fffdfa" stroke="#f9a825" stroke-width="2"/><rect x="80" y="70" width="60" height="60" fill="#fff8e1" stroke="#f9a825" stroke-width="4" rx="6"/><text x="110" y="35" text-anchor="middle" fill="#e65100" font-size="15" font-weight="900">鹽類：金屬陽離子＋酸根陰離子</text></svg>`
+};
+const CHEERS=[
+  "沒關係！這是超多學長姐跌倒的魔鬼細節，拍拍灰塵我們繼續！",
+  "差一點點！正負價數交叉放右下角再檢查一下，你一定能抓到！",
+  "不用急，答錯反而是賺到，現在把它狠狠記在腦海裡就贏了！",
+  "這題錯得超有價值！把名師開導讀完，段考遇到就是你秒殺別人了！"
+];
+const C=(ch,d,q,opts,ans,hint)=>({type:"choice",ch,d,q,opts,ans,hint});
+const I=(ch,d,q,vis,opts,ans,hint)=>({type:"image",ch,d,q,vis,opts,ans,hint});
+const M=(ch,d,q,pairs,hint)=>({type:"match",ch,d,q,pairs,hint});
+const S=(ch,d,q,cats,items,hint)=>({type:"sort",ch,d,q,cats,items:items.map(([t,c])=>({t,c})),hint});
+const F=(ch,d,target,correct,distractors,hint)=>({type:"feature",ch,d,q:`請選出「${target}」的正確描述或價數（可複選）。`,target,features:[...correct.map(t=>({t,ok:true})),...distractors.map(t=>({t,ok:false}))],hint});
+const Q=[
+  C("酸類單元",1,"請問『硫酸』的化學式應該怎麼寫？",["H2SO4","HNO3","HCl","CH3COOH"],0,"硫酸為強酸，含有兩個氫離子與一個硫酸根。"),
+  C("鹼類單元",1,"『氫氧化鈉』俗稱燒鹼，它的化學式是？",["NaOH","KOH","Ca(OH)2","Mg(OH)2"],0,"氫氧化鈉為強鹼，易溶於水，化學式為 NaOH。"),
+  C("鹽類單元",2,"小蘇打常用於製作麵包，它的中文名稱是『碳酸氫鈉』，化學式為？",["NaHCO3","Na2CO3","CaCO3","NaCl"],0,"碳酸氫鈉（NaHCO3）俗稱小蘇打，有『氫』比較輕，所以是『小』蘇打。"),
+  C("鹽類單元",2,"大理石、貝殼的主要成分是『碳酸鈣』，其化學式為？",["CaCO3","CaCl2","Na2CO3","K2SO4"],0,"碳酸鈣為白色沉澱，不溶於水，化學式為 CaCO3。"),
+  C("有機物單元",1,"葡萄糖是生物能量的主要來源，它的化學式為？",["C6H12O6","C2H5OH","C12H22O11","CH3COOH"],0,"葡萄糖是由碳、氫、氧組成的單醣，化學式為 C6H12O6。"),
+  C("有機物單元",2,"『醋酸鈉』是有機鹽類，它的寫法有特例，以下何者正確？",["CH3COONa","NaCH3COO","CH3COOH","NaCl"],0,"有機酸類與有機鹽類的負電酸根要寫在前面，金屬寫在後面，故為 CH3COONa！"),
+  C("氣體單元",1,"下列關於常用氣體的化學式，何者配對錯誤？",["氨氣：NH4+","氧氣：O2","氫氣：H2","氮氣：N2"],0,"氣字旁的『氨氣』是分子 NH3！帶正電的才是『銨根』離子（NH4+）喔！"),
+  C("氧化物單元",1,"二氧化錳在製造氧氣的實驗中當作催化劑，它的化學式是？",["MnO2","CO2","SO2","MgO"],0,"二氧化錳化學式為 MnO2。"),
+  C("鹽類單元",3,"『二鉻酸鉀』水溶液呈橙色，常在反應中作氧化劑，它的化學式是？",["K2Cr2O7","K2CrO4","KCl","KNO3"],0,"二鉻酸鉀是由鉀離子與二鉻酸根組成的鹽類，化學式為 K2Cr2O7。"),
+  C("離子單元",2,"下列哪一個是『銨根離子』的正確符號？",["NH4+","NH3","OH-","NO3-"],0,"銨根（NH4+）是少數由非金屬原子團組成的陽離子。"),
+  I("酸類圖鑑",1,"看圖特徵：請問『硝酸』符合此圖分類，它的化學式是？","acid",["HNO3","HCl","NaOH","H2O"],0,"硝酸水溶液解離出 H+，化學式為 HNO3。"),
+  I("鹼類圖鑑",2,"看圖特徵：澄清石灰水是『氫氧化鈣』的水溶液，它的化學式是？","alkali",["Ca(OH)2","NaOH","Mg(OH)2","NH3"],0,"氫氧化鈣由 Ca2+ 與兩個 OH- 組成，交叉法得出 Ca(OH)2。"),
+  I("鹽類圖鑑",2,"看圖特徵：工業用洗滌鹼為『碳酸鈉』，符合鹽類特徵，它的化學式是？","salt",["Na2CO3","NaHCO3","CaCO3","NaCl"],0,"碳酸鈉由兩個 Na+ 與一個 CO3 2- 組成，化學式為 Na2CO3。"),
+  M("化學式連連看",1,"請將常見中文名與化學式正確配對。",[["食鹽","NaCl"],["雙氧水","H2O2"],["氯化鈣","CaCl2"],["氯化氫","HCl"]],"食鹽為氯化鈉(NaCl)；雙氧水為過氧化氫水溶液(H2O2)。"),
+  M("經典酸根連連看",2,"請將酸根原子團中文與離子符號配對。",[["氫氧根","OH-"],["硝酸根","NO3-"],["硫酸根","SO4 2-"],["碳酸根","CO3 2-"]],"注意硫酸根與碳酸根都是負二價！"),
+  M("進階酸根連連看",3,"請將複雜原子團中文與離子符號配對。",[["醋酸根","CH3COO-"],["碳酸氫根","HCO3-"],["鉻酸根","CrO4 2-"],["二鉻酸根","Cr_2O_7 2-"]],"這些是國二下與國三電離子單元的超級大魔王！"),
+  S("物質大歸位",1,"把化學式放回正確的科學大分類中。",["酸類","鹼類","鹽類","有機物/其他"],[["HCl","酸類"],["H2SO4","酸類"],["NaOH","鹼類"],["Ca(OH)2","鹼類"],["NaCl","鹽類"],["KNO3","鹽類"],["C6H12O6","有機物/其他"],["C2H5OH","有機物/其他"]],"酸類前面有H；鹼類後面有OH；鹽類是金屬＋酸根；葡萄糖與乙醇則是有機物。"),
+  S("離子正負歸位",2,"把離子符號放回正確的正負電分類框中。",["陽離子(正電)","陰離子(負電)"],[["Cu 2+","陽離子(正電)"],["Zn 2+","陽離子(正電)"],["NH4+","陽離子(正電)"],["Fe 3+","陽離子(正電)"],["OH-","陰離子(負電)"],["SO4 2-","陰離子(負電)"],["CH3COO-","陰離子(負電)"],["O 2-","陰離子(負電)"]],"金屬與銨根帶正電；非金屬與酸根原子團帶負電。"),
+  F("銅離子與鋅離子",1,"銅離子 (Cu 2+) 與 鋅離子 (Zn 2+)",["都是正二價","都是陽離子","化學式寫在前面"],["是負一價","是原子團","水溶液都是藍色"],"銅與鋅都是正二價金屬陽離子，只有銅離子水溶液呈藍色，鋅離子是無色的。"),
+  F("醋酸 (CH3COOH)",2,"醋酸 (CH3COOH)",["屬於有機酸","溶於水呈酸性","酸根要寫在前面"],["屬於強電解質","前面有H開頭","分子量比葡萄糖大"],"醋酸是弱電解質，屬於有機物，書寫時酸根（CH3COO-）必須放在前面。"),
+  F("硫酸根離子",3,"硫酸根離子 (SO4 2-)",["是陰離子","是負二價","是由非金屬組成的原子團"],["是正二價","符號是SO3 2-","與鈣離子結合可溶於水"],"硫酸根是負二價原子團離子，與鈣離子結合會產生硫酸鈣白色沉澱，不溶於水。")
+];
+
+let selMode="choice",selLevel="easy",retryMode=false;
+let qs=[],qi=0,score=0,hearts=3,timeLeft=0,timer=null,locked=false;
+let wrongLog=[],selLeft=null,matchState=null,sortState=null,featureState=null;
+let audioCtx=null;
+const $=id=>document.getElementById(id);
+const els={
+  levelLabel:$("hud-level"),timeLabel:$("hud-time"),timeBox:$("hud-time-box"),
+  heartsLabel:$("hud-lives"),scoreLabel:$("hud-score"),
+  startScreen:$("start-screen"),quizScreen:$("quiz-screen"),endScreen:$("end-screen"),
+  chapterLabel:$("chapter-label"),countLabel:$("count-label"),
+  progressFill:$("progress-fill"),visualSlot:$("visual-slot"),
+  questionText:$("question-text"),answerArea:$("answer-area"),
+  feedback:$("feedback"),fbTitle:$("fb-title"),fbText:$("fb-text"),
+  nextBtn:$("next-btn"),quitBtn:$("quit-btn"),
+  endScore:$("end-score"),endMax:$("end-max"),rankBadge:$("rank-badge"),endMsg:$("end-msg"),
+  reviewList:$("review-list"),retryWrongBtn:$("retry-wrong-btn"),restartBtn:$("restart-btn")
+};
+$("mode-grid").addEventListener("click",e=>{
+  const c=e.target.closest(".mode-card");if(!c)return;
+  selMode=c.dataset.mode;
+  document.querySelectorAll(".mode-card").forEach(x=>x.classList.remove("sel"));
+  c.classList.add("sel");
+});
+$("level-grid").addEventListener("click",e=>{
+  const c=e.target.closest(".level-card");if(!c)return;
+  selLevel=c.dataset.level;
+  document.querySelectorAll(".level-card").forEach(x=>x.classList.remove("sel"));
+  c.classList.add("sel");
+});
+$("start-btn").addEventListener("click",()=>startGame(false));
+els.nextBtn.addEventListener("click",()=>{qi++;renderQ();});
+els.quitBtn.addEventListener("click",()=>{clearInterval(timer);document.body.classList.remove("time-alert");showScreen("startScreen");timeLeft=0;updateHUD();});
+els.restartBtn.addEventListener("click",()=>{showScreen("startScreen");timeLeft=0;updateHUD();});
+els.retryWrongBtn.addEventListener("click",()=>startGame(true));
+function showScreen(n){[els.startScreen,els.quizScreen,els.endScreen].forEach(s=>s.classList.remove("active"));els[n].classList.add("active");}
+function ensureAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();}
+function playTone(type){
+  try{
+    ensureAudio();const now=audioCtx.currentTime;
+    const pairs=type==="good"?[[620,.06],[820,.06]]:type==="bad"?[[240,.06],[180,.06]]:[[880,.035]];
+    pairs.forEach(([freq,vol],i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type==="tick"?"square":"sine";o.frequency.setValueAtTime(freq,now+i*.08);g.gain.setValueAtTime(vol,now+i*.08);g.gain.exponentialRampToValueAtTime(.001,now+i*.08+.12);o.connect(g);g.connect(audioCtx.destination);o.start(now+i*.08);o.stop(now+i*.08+.13);});
+  }catch(e){}
+}
+function flash(type){document.body.classList.remove("flash-good","flash-bad");void document.body.offsetWidth;document.body.classList.add(type==="good"?"flash-good":"flash-bad");setTimeout(()=>document.body.classList.remove("flash-good","flash-bad"),450);}
+function updateHUD(){
+  const lv=LEVELS[selLevel];
+  const mLabel=selMode==="choice"?"選擇":selMode==="sort"?"歸位":selMode==="feature"?"勾選":"配對";
+  els.levelLabel.textContent=retryMode?`${mLabel}錯題`:`${lv.label} ${mLabel}`;
+  els.timeLabel.textContent=timeLeft>0?`${timeLeft}s`:"—";
+  els.heartsLabel.textContent=hearts>0?"❤️".repeat(hearts)+"🤍".repeat(Math.max(0,(LEVELS[selLevel]?.hearts||3)-hearts)):"💀";
+  els.scoreLabel.textContent=score;
+  els.progressFill.style.width=qs.length?`${(qi/qs.length)*100}%`:"0%";
+  els.timeBox.classList.toggle("time-low",timeLeft>0&&timeLeft<=5);
+  document.body.classList.toggle("time-alert",timeLeft>0&&timeLeft<=5&&!locked);
+}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5);}
+function pickQ(lv,mode){const lv0={...LEVELS[lv]};const pool=Q.filter(q=>q.type===mode&&q.d<=lv0.maxD);return shuffle(pool).slice(0,lv0.count);}
+function startGame(useWrong){
+  ensureAudio();retryMode=useWrong;
+  qs=useWrong?wrongLog.map(w=>w.q):pickQ(selLevel,selMode);
+  qi=0;score=0;hearts=LEVELS[selLevel].hearts;wrongLog=[];
+  showScreen("quizScreen");renderQ();
+}
+function startTimer(){
+  clearInterval(timer);timeLeft=LEVELS[selLevel].seconds;updateHUD();
+  timer=setInterval(()=>{timeLeft--;if(timeLeft>0&&timeLeft<=5)playTone("tick");updateHUD();if(timeLeft<=0)handleTimeout();},1000);
+}
+function renderQ(){
+  if(qi>=qs.length||hearts<=0){finishGame();return;}
+  locked=false;selLeft=null;matchState=null;sortState=null;featureState=null;
+  const q=qs[qi];
+  els.chapterLabel.textContent=q.ch;
+  els.countLabel.textContent=`第 ${qi+1} 題 / ${qs.length}`;
+  els.questionText.innerHTML=toSub(q.q);
+  els.visualSlot.innerHTML="";els.answerArea.innerHTML="";
+  els.feedback.className="feedback";els.nextBtn.classList.add("hidden");
+  if(q.type==="choice"||q.type==="image"){if(q.type==="image"){const d=document.createElement("div");d.className="bio-visual";d.innerHTML=VISUALS[q.vis]||"";els.visualSlot.appendChild(d);}renderChoice(q);}
+  else if(q.type==="match")renderMatch(q);
+  else if(q.type==="sort")renderSort(q);
+  else if(q.type==="feature")renderFeature(q);
+  startTimer();updateHUD();
+}
+function toSub(s){return s.replace(/([A-Za-z\)\+\-])(\d+)/g,(_,p,n)=>`${p}<sub>${n}</sub>`);}
+function setHTML(el,s){el.innerHTML=toSub(s);}
+function renderChoice(q){
+  const opts=shuffle(q.opts.map((l,i)=>({l,i})));q._opts=opts;
+  const g=document.createElement("div");g.className="options-grid";
+  opts.forEach((o,idx)=>{const b=document.createElement("button");b.className="opt-btn";b.innerHTML=toSub(o.l);b.addEventListener("click",()=>handleChoice(idx,q));g.appendChild(b);});
+  els.answerArea.appendChild(g);
+}
+function handleChoice(idx,q){
+  if(locked)return;locked=true;clearInterval(timer);
+  const btns=[...els.answerArea.querySelectorAll(".opt-btn")];
+  const ok=q._opts[idx].i===q.ans;
+  btns.forEach((b,i)=>{b.disabled=true;if(q._opts[i].i===q.ans)b.classList.add("correct");});
+  if(!ok)btns[idx].classList.add("wrong");
+  if(ok){score+=10+Math.max(0,timeLeft);showFeedback("good","🎈 反應成功！沉澱物生成（答對囉）！",q.hint);playTone("good");flash("good");}
+  else{hearts--;wrongLog.push({q,sel:q._opts[idx].l});showFeedback("bad",CHEERS[Math.floor(Math.random()*CHEERS.length)],`正確答案是【${q.opts[q.ans]}】。${q.hint}`);playTone("bad");flash("bad");}
+  els.nextBtn.classList.remove("hidden");updateHUD();
+}
+function renderMatch(q){
+  matchState={solved:0,total:q.pairs.length,map:new Map(q.pairs)};
+  const left=shuffle(q.pairs.map(p=>p[0])),right=shuffle(q.pairs.map(p=>p[1]));
+  const board=document.createElement("div");board.className="match-board";
+  const lc=document.createElement("div");lc.className="match-col";lc.innerHTML='<div class="match-col-title">🧪 化學名稱</div>';
+  const rc=document.createElement("div");rc.className="match-col";rc.innerHTML='<div class="match-col-title">🔍 分子式 / 離子號</div>';
+  left.forEach(v=>{lc.appendChild(mkMatchBtn(v,"left"));});right.forEach(v=>{rc.appendChild(mkMatchBtn(v,"right"));});
+  board.appendChild(lc);board.appendChild(rc);els.answerArea.appendChild(board);
+}
+function mkMatchBtn(v,side){const b=document.createElement("button");b.className="match-card";b.innerHTML=toSub(v);b.dataset.side=side;b.dataset.val=v;b.addEventListener("click",()=>onMatchClick(b));return b;}
+function onMatchClick(btn){
+  if(locked||btn.classList.contains("done"))return;
+  if(btn.dataset.side==="left"){document.querySelectorAll(".match-card[data-side='left']").forEach(b=>b.classList.remove("sel"));selLeft=btn;btn.classList.add("sel");return;}
+  if(!selLeft)return;
+  if(matchState.map.get(selLeft.dataset.val)===btn.dataset.val){
+    [selLeft,btn].forEach(b=>{b.classList.add("correct","done");b.classList.remove("sel");b.disabled=true;});
+    selLeft=null;matchState.solved++;score+=8;playTone("good");updateHUD();
+    if(matchState.solved===matchState.total){locked=true;clearInterval(timer);score+=10+Math.max(0,timeLeft);showFeedback("good","🎉 哇！完美中和！化學鍵強力結合！",qs[qi].hint);els.nextBtn.classList.remove("hidden");flash("good");updateHUD();}
+  }else{[selLeft,btn].forEach(b=>b.classList.add("wrong"));playTone("bad");setTimeout(()=>{selLeft?.classList.remove("wrong","sel");btn.classList.remove("wrong");selLeft=null;},400);}
+}
+function renderSort(q){
+  sortState={sel:null,placed:new Map(),rendered:shuffle(q.items.map((it,i)=>({...it,i})))};
+  const board=document.createElement("div");board.className="sort-board";
+  const zones=document.createElement("div");zones.className="sort-zones";
+  q.cats.forEach(cat=>{const z=document.createElement("div");z.className="sort-zone";z.dataset.cat=cat;z.innerHTML=`<strong>${cat}</strong><div class="sort-drop-list"></div>`;z.addEventListener("click",()=>placeCard(z,q));zones.appendChild(z);});
+  const items=document.createElement("div");items.className="sort-items";
+  sortState.rendered.forEach((it,idx)=>{const b=document.createElement("button");b.className="sort-card";b.innerHTML=toSub(it.t);b.dataset.idx=idx;b.addEventListener("click",()=>{if(locked||b.classList.contains("done"))return;sortState.sel=idx;document.querySelectorAll(".sort-card").forEach(c=>c.classList.remove("sel"));b.classList.add("sel");});items.appendChild(b);});
+  board.appendChild(zones);board.appendChild(items);els.answerArea.appendChild(board);
+  const sub=document.createElement("button");sub.className="submit-btn";sub.textContent="確認化學藥劑大分類！ ✨";sub.addEventListener("click",()=>handleSort(false,q));els.answerArea.appendChild(sub);
+}
+function placeCard(zone,q){
+  if(locked||sortState.sel===null)return;
+  const idx=sortState.sel,it=sortState.rendered[idx];
+  const card=els.answerArea.querySelector(`.sort-card[data-idx="${idx}"]`);
+  if(!card||card.classList.contains("done"))return;
+  const pill=document.createElement("div");pill.className="sort-pill";pill.textContent=it.t;pill.dataset.idx=idx;pill.dataset.cat=zone.dataset.cat;
+  zone.querySelector(".sort-drop-list").appendChild(pill);
+  sortState.placed.set(idx,zone.dataset.cat);card.classList.add("done","sel");card.disabled=true;sortState.sel=null;updateHUD();
+}
+function handleSort(timedOut,q){
+  if(locked)return;locked=true;clearInterval(timer);
+  let wrong=0,missed=0;
+  const pills=[...els.answerArea.querySelectorAll(".sort-pill")];
+  sortState.rendered.forEach((it,idx)=>{const placed=sortState.placed.get(idx);if(!placed){missed++;return;}const pill=pills.find(p=>Number(p.dataset.idx)===idx);if(placed===it.c)pill?.classList.add("correct");else{wrong++;pill?.classList.add("wrong");}});
+  const ok=!timedOut&&wrong===0&&missed===0;
+  if(ok){score+=10+Math.max(0,timeLeft);showFeedback("good","⭐️ 分類大成功！藥品櫃整理得一塵不染！",q.hint);playTone("good");flash("good");}
+  else{hearts--;const ans=q.items.map(it=>`【${it.t} ➡️ ${it.c}】`).join(" ； ");wrongLog.push({q,sel:timedOut?"時間到未完成":`擺錯${wrong}個，遺漏${missed}個`});showFeedback("bad",timedOut?"哎呀溶液超時變質了！趕快看詳解補起來！":CHEERS[Math.floor(Math.random()*CHEERS.length)],`正確歸位：${ans}。${q.hint}`);playTone("bad");flash("bad");}
+  els.nextBtn.classList.remove("hidden");updateHUD();
+}
+function renderFeature(q){
+  featureState={sel:new Set(),rendered:shuffle(q.features.map((f,i)=>({...f,i})))};
+  const g=document.createElement("div");g.className="feature-grid";
+  featureState.rendered.forEach((f,idx)=>{const b=document.createElement("button");b.className="feat-btn";b.textContent=f.t;b.dataset.idx=idx;b.addEventListener("click",()=>{if(locked)return;if(featureState.sel.has(idx)){featureState.sel.delete(idx);b.classList.remove("sel");}else{featureState.sel.add(idx);b.classList.add("sel");}});g.appendChild(b);});
+  els.answerArea.appendChild(g);
+  const sub=document.createElement("button");sub.className="submit-btn";sub.textContent="檢驗完畢，送出光譜紀錄！ 🎁";sub.addEventListener("click",()=>handleFeature(false,q));els.answerArea.appendChild(sub);
+}
+function handleFeature(timedOut,q){
+  if(locked)return;locked=true;clearInterval(timer);
+  let hasWrong=false,hasMissed=false;
+  const btns=[...els.answerArea.querySelectorAll(".feat-btn")];
+  const picks=[];
+  featureState.rendered.forEach((f,idx)=>{const sel=featureState.sel.has(idx);const btn=btns[idx];btn.disabled=true;if(sel)picks.push(f.t);if(f.ok&&sel)btn.classList.add("correct");if(!f.ok&&sel){hasWrong=true;btn.classList.add("wrong");}if(f.ok&&!sel){hasMissed=true;btn.classList.add("missed");}});
+  const ok=!timedOut&&!hasWrong&&!hasMissed;
+  if(ok){score+=10+Math.max(0,timeLeft);showFeedback("good","🧸 價數特徵抓得超級準！理化大師就是你！",q.hint);playTone("good");flash("good");}
+  else{hearts--;const correct=q.features.filter(f=>f.ok).map(f=>f.t).join("、");wrongLog.push({q,sel:picks.length?picks.join("、"):"未勾選任何性質"});showFeedback("bad",timedOut?"時間到！快把這些特徵公式印在腦袋裡！":CHEERS[Math.floor(Math.random()*CHEERS.length)],`正確特徵是：【${correct}】。${q.hint}`);playTone("bad");flash("bad");}
+  els.nextBtn.classList.remove("hidden");updateHUD();
+}
+function handleTimeout(){
+  if(locked)return;
+  const q=qs[qi];
+  if(q.type==="sort"){locked=false;handleSort(true,q);}
+  else if(q.type==="feature"){locked=false;handleFeature(true,q);}
+  else if(q.type==="match"){locked=true;clearInterval(timer);hearts--;wrongLog.push({q,sel:"時間到了未完成配對"});showFeedback("bad","⏰ 滴答滴答，試管要炸了！快看著名師筆記防爆！",q.hint);els.nextBtn.classList.remove("hidden");playTone("bad");flash("bad");updateHUD();}
+  else{locked=true;clearInterval(timer);const btns=[...els.answerArea.querySelectorAll(".opt-btn")];btns.forEach((b,i)=>{b.disabled=true;if(q._opts[i].i===q.ans)b.classList.add("correct");});hearts--;wrongLog.push({q,sel:"未在限時內作答"});showFeedback("bad","⏰ 速度要加快喔！化學反應是不等人的！",`正確答案：${q.opts[q.ans]}。${q.hint}`);els.nextBtn.classList.remove("hidden");playTone("bad");flash("bad");updateHUD();}
+}
+function showFeedback(type,title,text){els.feedback.className=`feedback ${type} show`;els.fbTitle.textContent=title;els.fbText.textContent=text;}
+function finishGame(){
+  clearInterval(timer);document.body.classList.remove("time-alert");showScreen("endScreen");
+  const pct=qs.length?score/(qs.length*10):0;
+  let rank,rc,msg;
+  if(pct>=.9){rank="👑 諾貝爾獎";rc="var(--ny)";msg="🎉 太強了！化學式已經刻在你的DNA裡了！段考穩拿100分！";}
+  else if(pct>=.7){rank="⭐ 首席工程師";rc="var(--nb)";msg="🎈 表現極佳！再刷一次複習錯題，你就徹底無敵了！";}
+  else if(pct>=.5){rank="🌱 實驗室助手";rc="var(--ng)";msg="👍 觀念大致不錯！把底下的錯題名師私藏筆記讀完，實力直接暴衝！";}
+  else{rank="🐾 燒杯清洗員";rc="var(--np)";msg="不要氣餒！化學式多練幾次就會變直覺，繼續加油！";}
+  els.endScore.textContent=score;
+  els.endMax.textContent=`/ ${qs.length*10} 分`;
+  els.rankBadge.textContent=rank;
+  els.rankBadge.style.cssText=`border:3px solid ${rc};color:${rc};background:#fff;display:inline-block;padding:9px 30px;border-radius:32px;font-size:1.45rem;font-weight:900;letter-spacing:2px;margin-bottom:22px;box-shadow:0 5px 0 var(--dim);`;
+  els.endMsg.textContent=msg;
+  els.retryWrongBtn.classList.toggle("hidden",wrongLog.length===0);
+  renderReview();updateHUD();
+}
+function renderReview(){
+  els.reviewList.innerHTML="";
+  if(wrongLog.length===0){els.reviewList.innerHTML='<div class="review-item" style="border-color:var(--ng);background:rgba(67,160,71,.05);"><strong style="color:var(--ng);text-align:center;font-size:1.1rem;">🏆 跪了！零失誤完美過關！</strong><div class="ri-hint" style="text-align:center;">你可以去挑戰最高難度限時考驗，或去寫別的單元了！</div></div>';return;}
+  wrongLog.forEach((entry,i)=>{
+    const q=entry.q;
+    let correctAns=q.type==="match"?"完成全部正確配對":q.type==="sort"?"所有化學式正確歸類":q.type==="feature"?q.features.filter(f=>f.ok).map(f=>f.t).join("、"):q.opts[q.ans];
+    const d=document.createElement("div");d.className="review-item";
+    d.innerHTML=`<strong>🎯 錯題筆記 ${i+1}：${q.q}</strong><div class="ri-yours">❌ 你的答案：${entry.sel}</div><div class="ri-correct">⭕ 正確解析：${correctAns}</div><div class="ri-hint">💡 老師開導：${q.hint}</div>`;
+    els.reviewList.appendChild(d);
+  });
+}
+updateHUD();
+</script>
+</body>
+</html>
